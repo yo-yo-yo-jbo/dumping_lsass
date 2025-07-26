@@ -13,3 +13,13 @@ Stealing credentials from LSASS allows attackers to:
 - Access network resources without cracking passwords.
 - Move laterally without triggering brute-force alarms.
 
+## The basics of dumping lsass
+There are a few mitigations against dumping lsass memory, but for now - let's discuss a vanilla OS with no mitigations in place.  
+We will therefore decibe naive ways of dumping lsass.  
+Generally speaking, dumping lsass requires two things:
+1. Getting a process `HANDLE`, e.g. via a call to the [OpenProcess API](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess).
+2. Reading the process memory.
+
+### Task manager
+While that is probably the least stelthy technique out there, it's quite effective.  
+The Windows Task Manager (taskmgr.exe) is a GUI application that allows one to select a process and naively dump it:
