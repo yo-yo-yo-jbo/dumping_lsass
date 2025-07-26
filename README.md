@@ -24,3 +24,15 @@ Generally speaking, dumping lsass requires two things:
 While that is probably the least stelthy technique out there, it's quite effective.  
 The Windows Task Manager (taskmgr.exe) is a GUI application that allows one to select a process and naively dump it:
 ![Dumping with task manager, courtesy of hawk-eye.io](taskmgr_dump.png)
+
+The good thing here is that `taskmgr.exe` already runs on a target box ("living-off-the-land"), as well as doing everything for us - it opens a handle to `lsass.exe` and dumps its contents.  
+The bad news is that it's a GUI application, but it could be automated:
+1. Save the current foreground window for restoration.
+2. Run `taskmgr.exe` and get its process ID (available from a call to [CreateProcessW API](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw).
+3. Wait a bit and find the Task Manager window via the [FindWindowW API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-findwindoww). Interestingly, it's quite easy to find since that Window has a class name "TaskManagerWindow".
+4. Send keystrokes to the Task Manager window via the [SendInput API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput). We can inject the keystrokes that spell out "Local Security Authority", followed by the special "menu" keyboard input (`VK_APPS`), and then the letter "C", which will dump lsass.
+5. Use the [EnumWindows API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows) to get the window that shows the filename of the dump file and fetch its contents. Fetching the contents themselves could be dona via the [SendMessageW API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessagew) with the Windows Message `WM_GETTEXT`.
+6. Kill `taskmgr.exe` and restore the foreground window from step #1.
+7. Use the dump file and delete after use.
+
+
