@@ -20,7 +20,7 @@ Generally speaking, dumping lsass requires two things:
 1. Getting a process `HANDLE`, e.g. via a call to the [OpenProcess API](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess).
 2. Reading the process memory.
 
-### Task manager
+### Task manager dumping
 While that is probably the least stelthy technique out there, it's quite effective.  
 The Windows Task Manager (taskmgr.exe) is a GUI application that allows one to select a process and naively dump it:
 ![Dumping with task manager, courtesy of hawk-eye.io](taskmgr_dump.png)
@@ -35,4 +35,16 @@ The bad news is that it's a GUI application, but it could be automated:
 6. Kill `taskmgr.exe` and restore the foreground window from step #1.
 7. Use the dump file and delete after use.
 
+This might look similar to an [AutoHotkey](https://www.autohotkey.com) implementation - but this is very stitched to `lsass` dumping.
+
+### Rundll-based minidump
+Moving forward, the DLL `comsvcs.dll` exposes a `rundll32` interface for its `MiniDump` export.  
+It's as simple as running a commandline:
+```
+"%WINDIR%\System32\rundll32.exe" "%WINDIR%\System32\comsvcs.dll" MiniDump [PID] [PATH] full
+```
+
+Where `PID` is the `lsass.exe` process ID and `PATH` is a placeholder for the dump path.  
+One annoying thing I discovered was that you cannot quote the `PATH` placeholder, so it cannot contain spaces.  
+This minor annoyance could be avoided by converting the path we want to a `Short Path` - via the [GetShortPathNameW API](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getshortpathnamew).
 
