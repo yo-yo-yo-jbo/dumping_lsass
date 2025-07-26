@@ -37,7 +37,7 @@ The bad news is that it's a GUI application, but it could be automated:
 
 This might look similar to an [AutoHotkey](https://www.autohotkey.com) implementation - but this is very stitched to `lsass` dumping.
 
-### Rundll-based minidump
+### Rundll-comsvcs-based minidump
 Moving forward, the DLL `comsvcs.dll` exposes a `rundll32` interface for its `MiniDump` export.  
 It's as simple as running a commandline:
 ```
@@ -48,3 +48,20 @@ Where `PID` is the `lsass.exe` process ID and `PATH` is a placeholder for the du
 One annoying thing I discovered was that you cannot quote the `PATH` placeholder, so it cannot contain spaces.  
 This minor annoyance could be avoided by converting the path we want to a `Short Path` - via the [GetShortPathNameW API](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getshortpathnamew).
 
+### Procdump
+Another simple technique that might require 
+
+
+
+
+
+## Summary of techniques
+Here is a nice summary 
+
+
+
+| Method                    | Doesn't require child process | Doesn't Require further tooling | Doesn't touch disk |
+| ------------------------- | ----------------------------- | ------------------------------- | ------------------ |
+| Task manager              | ❌                            | ✅                              | ❌                |
+| Rundll32-comsvcs minidump | ❌                            | ✅                              | ❌                |
+| Procdump                  | ❌                            | ❌                              | ❌                |
