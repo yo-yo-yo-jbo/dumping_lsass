@@ -23,3 +23,4 @@ Generally speaking, dumping lsass requires two things:
 ### Task manager
 While that is probably the least stelthy technique out there, it's quite effective.  
 The Windows Task Manager (taskmgr.exe) is a GUI application that allows one to select a process and naively dump it:
+![Dumping with task manager, courtesy of hawk-eye.io](taskmgr_dump.png)
