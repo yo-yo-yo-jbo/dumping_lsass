@@ -49,19 +49,29 @@ One annoying thing I discovered was that you cannot quote the `PATH` placeholder
 This minor annoyance could be avoided by converting the path we want to a `Short Path` - via the [GetShortPathNameW API](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getshortpathnamew).
 
 ### Procdump
-Another simple technique that might require 
+Another simple technique that requires a child process is using [ProcDump](https://learn.microsoft.com/en-us/sysinternals/downloads/procdump) from the SysInternals suite.  
+One can download it directly (from https://download.sysinternals.com/files/Procdump.zip) or dump and and run it.  
+I mention procdump specifically because it's used by threat actors, as well as very prevalent.
+
+### Minidump API
+This technique mainly focuses on the [MiniDumpWriteDump API](https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump).  
+Up till this point, we used child processes, but now we're going to use our own code to perform `lsass.exe` dumping.  
+To use the `MiniDumpWriteDump` API, we need a `HANDLE` to `lsass.exe`. There are two variants that we will consider for now:
+
+#### Using OpenProcess
+This is the most direct and "normal" way of fetching the `lsass.exe` process handle:
+1. Finding the process ID of `lsass.exe` with [CreateToolhelp32Snapshot API](https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-createtoolhelp32snapshot), as well as [Process32FirstW](https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-process32firstw) and [Process32NextW](https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-process32nextw) API calls.
+2. Use the [OpenProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess) API. For doing a Minidump, we will require the `PROCESS_QUERY_INFORMATION` and `PROCESS_VM_READ` access flags.
 
 
-
-
+#### Stealing an existing handle
+a
 
 ## Summary of techniques
-Here is a nice summary 
+Here is a nice summary of the techniques, including pros and cons:
 
-
-
-| Method                    | Doesn't require child process | Doesn't Require further tooling | Doesn't touch disk |
-| ------------------------- | ----------------------------- | ------------------------------- | ------------------ |
-| Task manager              | ❌                            | ✅                              | ❌                |
-| Rundll32-comsvcs minidump | ❌                            | ✅                              | ❌                |
-| Procdump                  | ❌                            | ❌                              | ❌                |
+| Method                    | Doesn't require child process | Doesn't Require further tooling | Doesn't touch disk | Reliable |
+| ------------------------- | ----------------------------- | ------------------------------- | ------------------ | -------- |
+| Task manager              | ❌                            | ✅                              | ❌                | ❌       |
+| Rundll32-comsvcs minidump | ❌                            | ✅                              | ❌                | ✅       |
+| Procdump                  | ❌                            | ❌                              | ❌                | ✅       |
