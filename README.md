@@ -58,7 +58,20 @@ I mention procdump specifically because it's used by threat actors, as well as v
 ### Minidump API
 This technique mainly focuses on the [MiniDumpWriteDump API](https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump).  
 Up till this point, we used child processes, but now we're going to use our own code to perform `lsass.exe` dumping.  
-To use the `MiniDumpWriteDump` API, we need a `HANDLE` to `lsass.exe`. There are two variants that we will consider for now:
+To use the `MiniDumpWriteDump` API, we need a `HANDLE` to `lsass.exe`.  
+Assuming we got such a handle, we do the following:
+1. Create a new file and get its handle.
+2. Invoke the [MiniDumpWriteDump API](https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump) on the `lsass.exe` handle and the file handle.
+
+However, there is a variant that doesn't require writing to disk at all - we can save the entire dump to a memory buffer!  
+To achieve that, we:
+1. Create a buffer with some initial size.
+2. Create a structure of type `MINIDUMP_CALLBACK_INFORMATION` and specify a callback function (and context).
+3. Invoke the [MiniDumpWriteDump API](https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump) on the `lsass.exe` handle and the callback pointer.
+4. The callback accumulates the data from the minidump argument upon receivng a `IoWriteAllCallback` callback type. Ths might require us to dynamically enlarge the buffer with the `HeapReAlloc` API.
+
+Now, how do we get a handle to `lsass.exe` to begin with?  
+There are two variants that we will consider for now:
 
 #### Using OpenProcess
 This is the most direct and "normal" way of fetching the `lsass.exe` process handle:
@@ -66,7 +79,19 @@ This is the most direct and "normal" way of fetching the `lsass.exe` process han
 2. Use the [OpenProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess) API. For doing a Minidump, we will require the `PROCESS_QUERY_INFORMATION` and `PROCESS_VM_READ` access flags.
 
 #### Stealing an existing handle
-Since `OpenProcess` is usually heavily monitored by security products, there is a sneakier option - duplicating an existing handle to `lsass.exe` some other process might have.
+Since `OpenProcess` is usually heavily monitored by security products, there is a sneakier option - duplicating an existing handle to `lsass.exe` some other process might have.  
+Similarly to the `OpenProcess` approach - we fetch the `lsass.exe` PID the usual way (`CreateToolhelp32Snapshot` and friends).  
+However, here our approach would be finding an existing handle to `lsass.exe` with sufficient access flags:
+1. We call [ntdll!NtQuerySystemInformation](https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation) with the information class `SystemHandleInformation` (defined as 16) with a sufficiently large buffer. As of now, that information class is officially undocumented (but can be found [here](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/ntexapi/system_information_class.htm)).
+2. We treat the buffer as a [SYSTEM_HANDLE_INFORMATION](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/api/ex/sysinfo/handle.htm) pointer (again officially undocumented).
+3. For each handle, we skip if it belongs to the `lsass.exe` process ID itself, to our own process or the SYSTEM process ID (4).
+4. We call `ntdll!NtDuplicateObject` to duplicate the handle. In this call we also specify the required access flags.
+5. We call `ntdll!NtQueryObject` with type `OBJECT_TYPE_INFORMATION_CLASS` to get the duplicated handle type and make sure it's a `process` handle type.
+6. We call the [QueryFullProcessImageNameW API](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-queryfullprocessimagenamew) and validate it's indeed `lsass.exe` (note it's a full name so extra parsing is required).
+7. If all checks pass - we got a handle to `lsass.exe` that we've just duplicated! Otherwise, we clean up used resources and try a different handle.
+
+Note a running OS is not guaranteed to have an open `lsass.exe` by some process with sufficient access flags - if that's the case we can always revert to running `OpenProcess` as usual.  
+However, all the native APIs (and especially the handle duplication) make it way stealtier than calling `OpenProcess` directly.
 
 ## Summary of techniques
 Here is a nice summary of the techniques, including pros and cons:
