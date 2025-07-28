@@ -102,7 +102,6 @@ Here is a nice summary of the techniques, including pros and cons:
 | Rundll32-comsvcs minidump  | ❌                            | ✅                              | ❌                | ✅       |
 | Procdump                   | ❌                            | ❌                              | ❌                | ✅       |
 | Minidump API               | ✅                            | ✅                              | ✅                | ✅       |
-| PssCaptureSnapshot API     | ✅                            | ✅                              | ✅                | ✅       |
 | Shtinikering               | ✅                            | ✅                              | ✅                | ✅       |
 | SilentProcessExit API      | ✅                            | ✅                              | ✅                | ✅       |
 | Whole memory dump          | ✅                            | ✅                              | ✅                | ✅       |
