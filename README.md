@@ -63,15 +63,19 @@ This is the most direct and "normal" way of fetching the `lsass.exe` process han
 1. Finding the process ID of `lsass.exe` with [CreateToolhelp32Snapshot API](https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-createtoolhelp32snapshot), as well as [Process32FirstW](https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-process32firstw) and [Process32NextW](https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-process32nextw) API calls.
 2. Use the [OpenProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess) API. For doing a Minidump, we will require the `PROCESS_QUERY_INFORMATION` and `PROCESS_VM_READ` access flags.
 
-
 #### Stealing an existing handle
-a
+Since `OpenProcess` is usually heavily monitored by security products, there is a sneakier option - duplicating an existing handle to `lsass.exe` some other process might have.
 
 ## Summary of techniques
 Here is a nice summary of the techniques, including pros and cons:
 
-| Method                    | Doesn't require child process | Doesn't Require further tooling | Doesn't touch disk | Reliable |
-| ------------------------- | ----------------------------- | ------------------------------- | ------------------ | -------- |
-| Task manager              | ❌                            | ✅                              | ❌                | ❌       |
-| Rundll32-comsvcs minidump | ❌                            | ✅                              | ❌                | ✅       |
-| Procdump                  | ❌                            | ❌                              | ❌                | ✅       |
+| Method                     | Doesn't require child process | Doesn't Require further tooling | Doesn't touch disk | Reliable |
+| -------------------------- | ----------------------------- | ------------------------------- | ------------------ | -------- |
+| Task manager               | ❌                            | ✅                              | ❌                | ❌       |
+| Rundll32-comsvcs minidump  | ❌                            | ✅                              | ❌                | ✅       |
+| Procdump                   | ❌                            | ❌                              | ❌                | ✅       |
+| Minidump API               | ✅                            | ✅                              | ✅                | ✅       |
+| PssCaptureSnapshot API     | ✅                            | ✅                              | ✅                | ✅       |
+| Shtinikering               | ✅                            | ✅                              | ✅                | ✅       |
+| SilentProcessExit API      | ✅                            | ✅                              | ✅                | ✅       |
+| Whole memory dump          | ✅                            | ✅                              | ✅                | ✅       |
