@@ -104,6 +104,11 @@ This technique relies on a Windows mechanism that can invoke a callback once a p
 To implement this technique, we do the following:
 1. Get an `lsass.exe` handle (either via `OpenProcess` or by handle duplication).
 2. Write to the registry under the [Image File Execution Options (IFEO)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/xperf/image-file-execution-options) key `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\lsass.exe`. Value name is `GlobalFlag` which is of type `DWORD`, and we set it to the value of `0x200`, which corresponds to enabling the Silent Process Exit monitoring feature.
+3. Write to the registry again, this time under `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SilentProcessExit\lsass.exe`, the value is a `DWORD` with the name `ReportingMode` and the value of `2`, which instructs the OS to perform a full memory dump.
+4. Set the value `LocalDumpFolder` under `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SilentProcessExit\lsass.exe` to point to a folder we'd like to dump the memory to, and set the value `DumpType` (which is a `DWORD`) to be `2` (local memory dump).
+5. Call `ntdll!RtlReportSilentProcessExit`, which is an undocumented function that would report that a silent process exit should occur for a given process handle (`lsass.exe` in our case).
+
+At that point, our dump file has been created at the folder we assigned, and we can delete all added registry entries.
 
 ### Shtinikering
 Originally done by [Deep Instinct](https://www.deepinstinct.com), this method requires running as `SYSTEM` (can be validated using the [GetTokenInformation API](https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation) if necessary).  
