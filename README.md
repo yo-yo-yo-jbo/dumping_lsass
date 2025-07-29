@@ -110,6 +110,11 @@ To implement this technique, we do the following:
 
 At that point, our dump file has been created at the folder we assigned, and we can delete all added registry entries.
 
+### Whole memory dumping with ReadProcessMemory
+This very simple technique basically reads all of `lsass.exe` memory via the [ReadProcessMemory API](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-readprocessmemory).  
+To iterate all memory regions, one can use the [VirtualQueryEx API](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualqueryex) and retrieve a region's size and protections.  
+Most juicy stuff (credential material) will be in readable-writable (RW) regions, as it's allocated dynamically.
+
 ### Shtinikering
 Originally done by [Deep Instinct](https://www.deepinstinct.com), this method requires running as `SYSTEM` (can be validated using the [GetTokenInformation API](https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation) if necessary).  
 Just as before, we fetch a handle to `lsass.exe` with either `OpenProcess` or duplication, and then dumps using [Windows Error Reporting (WER)](https://en.wikipedia.org/wiki/Windows_Error_Reporting)!  
@@ -122,13 +127,13 @@ To do this, we report an exception to WER via [ALPC](https://en.wikipedia.org/wi
 ## Summary of techniques
 Here is a nice summary of the techniques, including pros and cons:
 
-| Method                     | Doesn't require child process | Doesn't Require further tooling | Can avoid touching disk | Reliable | Remarks |
-| -------------------------- | ----------------------------- | ------------------------------- | ----------------------- | -------- | --------------------------- |
-| Task manager               | ❌                            | ✅                              | ❌                     | ❌       | ✅                          |
-| Rundll32-comsvcs minidump  | ❌                            | ✅                              | ❌                     | ✅       | ✅                          |
-| Procdump                   | ❌                            | ❌                              | ❌                     | ✅       | ✅                          |
-| Minidump API               | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
-| PssCaptureSnapshot API     | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
-| Shtinikering               | ✅                            | ✅                              | ❌                     | ✅       | Requires running as SYSTEM  |
-| SilentProcessExit          | ✅                            | ✅                              | ❌                     | ✅       | Writes to registry          |
-| Whole memory dump          | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
+| Method                     | Doesn't require child process | Doesn't Require further tooling | Can avoid touching disk | Remarks                              |
+| -------------------------- | ----------------------------- | ------------------------------- | ----------------------- | ------------------------------------ |
+| Task manager               | ❌                            | ✅                              | ❌                     | Might have reliability issues (GUI)  |
+| Rundll32-comsvcs minidump  | ❌                            | ✅                              | ❌                     | ---                                  |
+| Procdump                   | ❌                            | ❌                              | ❌                     | Might write to registry (EULA)       |
+| Minidump API               | ✅                            | ✅                              | ✅                     | ---                                  |
+| PssCaptureSnapshot API     | ✅                            | ✅                              | ✅                     | ---                                  |
+| Shtinikering               | ✅                            | ✅                              | ❌                     | Requires running as SYSTEM           |
+| SilentProcessExit          | ✅                            | ✅                              | ❌                     | Writes to registry                   |
+| Whole memory dump          | ✅                            | ✅                              | ✅                     | Might have reliability issues (racy) |
