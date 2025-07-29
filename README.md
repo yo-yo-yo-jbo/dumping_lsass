@@ -99,16 +99,25 @@ Then, we call the [PssCaptureSnapshot API](https://learn.microsoft.com/en-us/win
 As the name suggests, that handle captures a "snapshot" of the `lsass.exe` state (includng memory), and then could be used just like a normal handle to `ReadProcessMemory` or `MiniDumpWriteDump`.  
 The approach doesn't seem advantageous, but it's very reliable due to how it captures a snapshot (as opposed to direct `ReadProcessMemory` which has an inherent race condition, for example).
 
+### Shtinikering
+Originally done by [Deep Instinct](https://www.deepinstinct.com), this method requires running as `SYSTEM` (can be validated using the [GetTokenInformation API](https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation) if necessary).  
+Just as before, we fetch a handle to `lsass.exe` with either `OpenProcess` or duplication, and then dumps using [Windows Error Reporting (WER)](https://en.wikipedia.org/wiki/Windows_Error_Reporting)!  
+To do this, we report an exception to WER via [ALPC](https://en.wikipedia.org/wiki/Local_Inter-Process_Communication):
+1. We get some thread of `lsass.exe` (can be done with the `CreateToolhelp32Snapshot` API) - and save its thread ID.
+2. We create two events that we will pass to the ALPC message: a "recovery event" and a "completion event".
+3. We create a memory-mapped file that will contain a structure that'd maintain exception information (requires writable memory). That structure contains information for WER, including the events that we created, as well as exception information, process ID, the failing thread ID and so on.
+4. 
+
 ## Summary of techniques
 Here is a nice summary of the techniques, including pros and cons:
 
-| Method                     | Doesn't require child process | Doesn't Require further tooling | Doesn't touch disk | Reliable |
-| -------------------------- | ----------------------------- | ------------------------------- | ------------------ | -------- |
-| Task manager               | ❌                            | ✅                              | ❌                | ❌       |
-| Rundll32-comsvcs minidump  | ❌                            | ✅                              | ❌                | ✅       |
-| Procdump                   | ❌                            | ❌                              | ❌                | ✅       |
-| Minidump API               | ✅                            | ✅                              | ✅                | ✅       |
-| PssCaptureSnapshot API     | ✅                            | ✅                              | ✅                | ✅       |
-| Shtinikering               | ✅                            | ✅                              | ✅                | ✅       |
-| SilentProcessExit API      | ✅                            | ✅                              | ✅                | ✅       |
-| Whole memory dump          | ✅                            | ✅                              | ✅                | ✅       |
+| Method                     | Doesn't require child process | Doesn't Require further tooling | Can avoid touching disk | Reliable | Can avoid running as SYSTEM |
+| -------------------------- | ----------------------------- | ------------------------------- | ----------------------- | -------- | --------------------------- |
+| Task manager               | ❌                            | ✅                              | ❌                     | ❌       | ✅                          |
+| Rundll32-comsvcs minidump  | ❌                            | ✅                              | ❌                     | ✅       | ✅                          |
+| Procdump                   | ❌                            | ❌                              | ❌                     | ✅       | ✅                          |
+| Minidump API               | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
+| PssCaptureSnapshot API     | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
+| Shtinikering               | ✅                            | ✅                              | ❌                     | ✅       | ❌                          |
+| SilentProcessExit API      | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
+| Whole memory dump          | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
