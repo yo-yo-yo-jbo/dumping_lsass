@@ -166,3 +166,13 @@ Hyper-V vulnerabilities are a possibility but expensive, as well as [Bootkits](h
 A more feasible option would be abusing `VTL0` memory - short-term secrets might still exist in the `VTL0` `lsass.exe` memory.  
 Lastly, downgrade attacks are still possible (disabling VBS or Hyper-V) and require reboots. Those also have other complications as they invalidate [Secure Boot](https://github.com/yo-yo-yo-jbo/tpm_vs_bootkit/).
 Other options include other avenues (keylogging etc.) but I classify those as completely seperate techniques for getting credentials.
+
+## Summary
+In this blogpost we've mentioned several popular trends in gaining credentials from `lsass.exe`.  
+I've shardd pros and cons for each technique, *coded them all* and then presented modern mitigations and how one might bypass them.  
+I have not mentioned security solutions, but obviously security solutions monitor `lsass.exe` dumps quite heavily.  
+I intend to explain more about other types of credentials you might find on Windows machines - in a future blogpost.
+
+Stay tuned!
+
+Jonathan Bar Or
