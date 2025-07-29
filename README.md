@@ -123,8 +123,9 @@ To do this, we report an exception to WER via [ALPC](https://en.wikipedia.org/wi
 2. We create two events that we will pass to the ALPC message: a "recovery event" and a "completion event".
 3. We create a memory-mapped file that will contain a structure that'd maintain exception information (requires writable memory). That structure contains information for WER, including the events that we created, as well as exception information, process ID, the failing thread ID and so on.
 4. We make sure WER service starts using [Windows Notification Facility (WNF)](https://blog.trailofbits.com/2023/05/15/introducing-windows-notification-facilitys-wnf-code-integrity/) using `ntdll!NtUpdateWnfStateData` and `ntdll!EtwEventWriteNoRegistration`.
-5. We prepare the ALPC message by invoking `ntdll!NtAlpcConnectPort` and `ntdll!NtAlpcSendWaitReceivePort`.
-6. The dump will be under `%LocalAppData%\CrashDumps` - we take the freshest dump.
+5. We wait for WER to be available using `ntdll!NtWaitForSingleObject` on `\KernelObjects\SystemErrorPortReady`.
+6. We connect to ALPC port `\WindowsErrorReportingServicePort` via `ntdll!NtAlpcConnectPort` and then send to message via `ntdll!NtAlpcSendWaitReceivePort`.
+7. The dump will be under `%LocalAppData%\CrashDumps` - we take the freshest dump.
 
 ## Summary of techniques
 Here is a nice summary of the techniques, including pros and cons:
