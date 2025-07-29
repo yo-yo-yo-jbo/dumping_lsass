@@ -140,3 +140,29 @@ Here is a nice summary of the techniques, including pros and cons:
 | Shtinikering               | ✅                            | ✅                              | ❌                     | Requires running as SYSTEM           |
 | SilentProcessExit          | ✅                            | ✅                              | ❌                     | Writes to registry                   |
 | Whole memory dump          | ✅                            | ✅                              | ✅                     | Might have reliability issues (racy) |
+
+## Mitigations
+In terms of modern builtin mitigations, two immidiately come to mind:
+
+### LSA protection
+A mitigation called [LSA protection](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection) makes `lsass.exe` a Protected Process Light (PPL). It's configurable via registry: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa`, value name `RunAsPPL` of type `DWORD` - a value of `1` means `lsass.exe` is PPL.  
+As a reminder, one cannot get a protected process handle (unless the protection flags for `OpenProcess` are only to query information) unless the caller is also a protected process.  
+Thus, calling `OpenProcess` from a non-protected process context fails. That also means duplicating a handle would not work, as the only processes that will have an `lsass.exe` handle with sufficient permissions are protected processes too.
+
+#### Potential bypasses
+LSA protection can be bypassed by turning `lsass.exe` into non-PPL - from userland it requires a reboot, but a kernel write primitive can simply mark the process as non-PPL (via the [EPROCESS structure](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/ntos/ps/eprocess/index.htm) in the kernel). Indeed a popular approach is bringing a vulnerable driver and running it.  
+Another option is to get arbitrary code to run as PPL (known as a `PPL bypass`).  
+Lastly, booting into recovery \ safe mode works, but that requires a reboot.
+
+### Credential Guard
+[Credential Guard](https://learn.microsoft.com/en-us/windows/security/identity-protection/credential-guard/) is a part of Microsoft's [Virtualization Based Security (VBS)](https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-vbs).  
+In a nutshell, you can imagine your OS to run side-by-side with another OS that is super hardened (Secure Kernel), with no means of reading memory between the two (similar concept to ARM TrustZone).  
+Microsoft terminology states that your normal OS runs in `Virtual Trust Level (VTL)` number 0 - `VTL0`, and the secure OS runs in `VTL1`, both are segregated by Hyper-V (the Microsoft hypervisor).  
+When it comes to Credential Guard, `lsass.exe` lives in `VTL0` and the counterpart in `VTL1` is called `lsaiso.exe` - `lsass.exe` and `lsaiso.exe` communicate via `ALPC`.  
+NTLM hashes, Kerberos TGTs and domain secrets (such as DPAPI master keys) live in `VTL1` and never leave `VTL1` memory, thus dumping `lsass.exe` or reading from its memory directly is meaningless.  
+
+#### Potential bypasses
+Hyper-V vulnerabilities are a possibility but expensive, as well as [Bootkits](https://github.com/yo-yo-yo-jbo/bootkit_anatomy/).  
+A more feasible option would be abusing `VTL0` memory - short-term secrets might still exist in the `VTL0` `lsass.exe` memory.  
+Lastly, downgrade attacks are still possible (disabling VBS or Hyper-V) and require reboots. Those also have other complications as they invalidate [Secure Boot](https://github.com/yo-yo-yo-jbo/tpm_vs_bootkit/).
+Other options include other avenues (keylogging etc.) but I classify those as completely seperate techniques for getting credentials.
