@@ -93,6 +93,12 @@ However, here our approach would be finding an existing handle to `lsass.exe` wi
 Note a running OS is not guaranteed to have an open `lsass.exe` by some process with sufficient access flags - if that's the case we can always revert to running `OpenProcess` as usual.  
 However, all the native APIs (and especially the handle duplication) make it way stealtier than calling `OpenProcess` directly.
 
+### PssCaptureSnapshot-based dumping
+Similarly to the Minidump approach, we get a handle to `lsass.exe` by means of `OpenProcess` or handle duplication, but this time also with `PROCESS_DUP_HANDLE` access flag.  
+Then, we call the [PssCaptureSnapshot API](https://learn.microsoft.com/en-us/windows/win32/api/processsnapshot/nf-processsnapshot-psscapturesnapshot?redirectedfrom=MSDN) which returns us a pseudo-handle of type `HPSS`.  
+As the name suggests, that handle captures a "snapshot" of the `lsass.exe` state (includng memory), and then could be used just like a normal handle to `ReadProcessMemory` or `MiniDumpWriteDump`.  
+The approach doesn't seem advantageous, but it's very reliable due to how it captures a snapshot (as opposed to direct `ReadProcessMemory` which has an inherent race condition, for example).
+
 ## Summary of techniques
 Here is a nice summary of the techniques, including pros and cons:
 
@@ -102,6 +108,7 @@ Here is a nice summary of the techniques, including pros and cons:
 | Rundll32-comsvcs minidump  | ❌                            | ✅                              | ❌                | ✅       |
 | Procdump                   | ❌                            | ❌                              | ❌                | ✅       |
 | Minidump API               | ✅                            | ✅                              | ✅                | ✅       |
+| PssCaptureSnapshot API     | ✅                            | ✅                              | ✅                | ✅       |
 | Shtinikering               | ✅                            | ✅                              | ✅                | ✅       |
 | SilentProcessExit API      | ✅                            | ✅                              | ✅                | ✅       |
 | Whole memory dump          | ✅                            | ✅                              | ✅                | ✅       |
