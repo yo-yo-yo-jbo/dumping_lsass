@@ -99,6 +99,12 @@ Then, we call the [PssCaptureSnapshot API](https://learn.microsoft.com/en-us/win
 As the name suggests, that handle captures a "snapshot" of the `lsass.exe` state (includng memory), and then could be used just like a normal handle to `ReadProcessMemory` or `MiniDumpWriteDump`.  
 The approach doesn't seem advantageous, but it's very reliable due to how it captures a snapshot (as opposed to direct `ReadProcessMemory` which has an inherent race condition, for example).
 
+### SilentProcessExit-based dumping
+This technique relies on a Windows mechanism that can invoke a callback once a process exits, as well as fooling the system into thinking the process indeed exited.
+To implement this technique, we do the following:
+1. Get an `lsass.exe` handle (either via `OpenProcess` or by handle duplication).
+2. Write to the registry under the [Image File Execution Options (IFEO)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/xperf/image-file-execution-options) key `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\lsass.exe`. Value name is `GlobalFlag` which is of type `DWORD`, and we set it to the value of `0x200`, which corresponds to enabling the Silent Process Exit monitoring feature.
+
 ### Shtinikering
 Originally done by [Deep Instinct](https://www.deepinstinct.com), this method requires running as `SYSTEM` (can be validated using the [GetTokenInformation API](https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation) if necessary).  
 Just as before, we fetch a handle to `lsass.exe` with either `OpenProcess` or duplication, and then dumps using [Windows Error Reporting (WER)](https://en.wikipedia.org/wiki/Windows_Error_Reporting)!  
@@ -111,13 +117,13 @@ To do this, we report an exception to WER via [ALPC](https://en.wikipedia.org/wi
 ## Summary of techniques
 Here is a nice summary of the techniques, including pros and cons:
 
-| Method                     | Doesn't require child process | Doesn't Require further tooling | Can avoid touching disk | Reliable | Can avoid running as SYSTEM |
+| Method                     | Doesn't require child process | Doesn't Require further tooling | Can avoid touching disk | Reliable | Remarks |
 | -------------------------- | ----------------------------- | ------------------------------- | ----------------------- | -------- | --------------------------- |
 | Task manager               | ❌                            | ✅                              | ❌                     | ❌       | ✅                          |
 | Rundll32-comsvcs minidump  | ❌                            | ✅                              | ❌                     | ✅       | ✅                          |
 | Procdump                   | ❌                            | ❌                              | ❌                     | ✅       | ✅                          |
 | Minidump API               | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
 | PssCaptureSnapshot API     | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
-| Shtinikering               | ✅                            | ✅                              | ❌                     | ✅       | ❌                          |
-| SilentProcessExit API      | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
+| Shtinikering               | ✅                            | ✅                              | ❌                     | ✅       | Requires running as SYSTEM  |
+| SilentProcessExit          | ✅                            | ✅                              | ❌                     | ✅       | Writes to registry          |
 | Whole memory dump          | ✅                            | ✅                              | ✅                     | ✅       | ✅                          |
