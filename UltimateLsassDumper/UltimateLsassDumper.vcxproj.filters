@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Auxiliary">
+      <UniqueIdentifier>{426178e5-c922-431d-996d-c9304069c607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{78242c52-438d-423b-ab30-f9b47e501daa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DumpTaskManager">
+      <UniqueIdentifier>{ba7a8d53-6285-46b3-9e90-f7dc219a9791}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DumpSilentProcessExit">
+      <UniqueIdentifier>{ef18117b-a8ac-4724-bcea-81a47d8ac296}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DumpComsvcs">
+      <UniqueIdentifier>{9122f002-d644-4a7a-9f7a-436d2d5ab3e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DumpMiniDump">
+      <UniqueIdentifier>{ad3bbc2a-2934-4ffd-b304-d9cc704428db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DumpProcdump">
+      <UniqueIdentifier>{f96b6f8f-1f00-4b96-886b-b5ae5ca50d37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DumpPssCaptureSnapshot">
+      <UniqueIdentifier>{d858ead4-17c4-4c75-b8ff-e39b8140d724}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DumpWholeMemory">
+      <UniqueIdentifier>{776e83e2-3b75-47f2-97e4-e4a4e7932e16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DumpShtinkering">
+      <UniqueIdentifier>{43195db5-4e35-4e17-9f0c-197d8de7663b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DllMain">
+      <UniqueIdentifier>{f9dfd2e2-1cf6-497d-854e-2343cd0b91b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Exports">
+      <UniqueIdentifier>{9c14f0ba-dfbc-420a-b0e9-fa1567583d37}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Auxiliary.h">
+      <Filter>Source Files\Auxiliary</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpTaskManager.h">
+      <Filter>Source Files\DumpTaskManager</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpSilentProcessExit.h">
+      <Filter>Source Files\DumpSilentProcessExit</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpComsvcs.h">
+      <Filter>Source Files\DumpComsvcs</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpMiniDump.h">
+      <Filter>Source Files\DumpMiniDump</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpProcdump.h">
+      <Filter>Source Files\DumpProcdump</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpPssCaptureSnapshot.h">
+      <Filter>Source Files\DumpPssCaptureSnapshot</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpWholeMem.h">
+      <Filter>Source Files\DumpWholeMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpShtinkering.h">
+      <Filter>Source Files\DumpShtinkering</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Common.c">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpTaskManager.c">
+      <Filter>Source Files\DumpTaskManager</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpSilentProcessExit.c">
+      <Filter>Source Files\DumpSilentProcessExit</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpComsvcs.c">
+      <Filter>Source Files\DumpComsvcs</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpMiniDump.c">
+      <Filter>Source Files\DumpMiniDump</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpProcdump.c">
+      <Filter>Source Files\DumpProcdump</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpPssCaptureSnapshot.c">
+      <Filter>Source Files\DumpPssCaptureSnapshot</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpWholeMem.c">
+      <Filter>Source Files\DumpWholeMemory</Filter>
+    </ClCompile>
+    <ClCompile Include="DumpShtinkering.c">
+      <Filter>Source Files\DumpShtinkering</Filter>
+    </ClCompile>
+    <ClCompile Include="DllMain.c">
+      <Filter>Source Files\DllMain</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Exports.def">
+      <Filter>Source Files\Exports</Filter>
+    </None>
+  </ItemGroup>
+</Project>
