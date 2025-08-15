@@ -169,7 +169,7 @@ Other options include other avenues (keylogging etc.) but I classify those as co
 
 ## Summary
 In this blogpost we've mentioned several popular trends in gaining credentials from `lsass.exe`.  
-I've shardd pros and cons for each technique, *coded them all* and then presented modern mitigations and how one might bypass them.  
+I've shared pros and cons for each technique, *coded them all* and then presented modern mitigations and how one might bypass them.  
 I have not mentioned security solutions, but obviously security solutions monitor `lsass.exe` dumps quite heavily.  
 I intend to explain more about other types of credentials you might find on Windows machines - in a future blogpost.
 
