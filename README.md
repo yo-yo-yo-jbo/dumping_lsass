@@ -175,4 +175,4 @@ I intend to explain more about other types of credentials you might find on Wind
 
 Stay tuned!
 
-Jonathan Bar Or
+Jonathan Bar Or (https://jonathanbaror.com)
